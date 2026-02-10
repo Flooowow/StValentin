@@ -423,10 +423,6 @@
     <div class="screen" id="screen10">
         <h1>Voilà un petit quizz</h1>
         <div id="quizContainer"></div>
-        <div id="quizResult" style="display: none;">
-            <div class="score-display" id="scoreDisplay"></div>
-            <button class="btn-yes" onclick="nextScreen(11)">Suivant</button>
-        </div>
     </div>
 
     <!-- Écran 11 -->
@@ -458,6 +454,9 @@
         let memoryTimer = 60;
         let memoryInterval;
         let btn11Clicked = 0;
+        let currentQuizQuestion = 0;
+        let quizScore = 0;
+        let quizQuestions = [];
 
         // Écran 1 - Bouton NON qui fuit
         const btnNo = document.getElementById('btnNo');
@@ -803,7 +802,7 @@
 
         // Écran 10 - Quiz
         function initQuiz() {
-            const questions = [
+            quizQuestions = [
                 {
                     q: "Où nous sommes nous rencontré pour la première fois?",
                     type: "text",
@@ -843,69 +842,95 @@
                 }
             ];
 
-            const container = document.getElementById('quizContainer');
-            container.innerHTML = '';
-
-            questions.forEach((q, idx) => {
-                const div = document.createElement('div');
-                div.className = 'quiz-question';
-
-                let html = `<h3>Question ${idx + 1} (${q.points} point${q.points > 1 ? 's' : ''}): ${q.q}</h3>`;
-
-                if (q.type === 'text' || q.type === 'number') {
-                    html += `<input type="${q.type}" id="q${idx}" data-answers='${JSON.stringify(q.answers)}' data-points="${q.points}">`;
-                } else if (q.type === 'checkbox') {
-                    q.options.forEach(opt => {
-                        html += `<label><input type="checkbox" value="${opt.toLowerCase()}" data-question="${idx}"> ${opt}</label>`;
-                    });
-                    html += `<div style="display:none" data-answers='${JSON.stringify(q.answers)}' data-points="${q.points}" id="q${idx}"></div>`;
-                }
-
-                div.innerHTML = html;
-                container.appendChild(div);
-            });
-
-            const submitBtn = document.createElement('button');
-            submitBtn.className = 'btn-yes';
-            submitBtn.textContent = 'Valider';
-            submitBtn.onclick = checkQuiz;
-            container.appendChild(submitBtn);
+            currentQuizQuestion = 0;
+            quizScore = 0;
+            showQuizQuestion();
         }
 
-        function checkQuiz() {
-            let score = 0;
-            let maxScore = 11;
+        function showQuizQuestion() {
+            const container = document.getElementById('quizContainer');
+            
+            if (currentQuizQuestion >= quizQuestions.length) {
+                // Quiz terminé
+                showQuizResult();
+                return;
+            }
 
-            // Questions texte et nombre
-            document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
-                const answers = JSON.parse(input.dataset.answers);
+            const q = quizQuestions[currentQuizQuestion];
+            container.innerHTML = '';
+
+            const div = document.createElement('div');
+            div.className = 'quiz-question';
+
+            let html = `<h3>Question ${currentQuizQuestion + 1}/${quizQuestions.length} (${q.points} point${q.points > 1 ? 's' : ''})</h3>`;
+            html += `<p style="font-size: 1.3em; margin: 20px 0;">${q.q}</p>`;
+
+            if (q.type === 'text' || q.type === 'number') {
+                html += `<input type="${q.type}" id="quizInput" style="width: 100%; padding: 15px; font-size: 1.2em; border-radius: 10px; border: 2px solid #FE895E; margin: 20px 0;">`;
+            } else if (q.type === 'checkbox') {
+                html += '<div style="text-align: left; margin: 20px 0;">';
+                q.options.forEach(opt => {
+                    html += `<label style="display: block; margin: 15px 0; font-size: 1.2em;">
+                        <input type="checkbox" value="${opt.toLowerCase()}" style="width: auto; margin-right: 10px; transform: scale(1.5);"> ${opt}
+                    </label>`;
+                });
+                html += '</div>';
+            }
+
+            div.innerHTML = html;
+            container.appendChild(div);
+
+            const btnValidate = document.createElement('button');
+            btnValidate.className = 'btn-yes';
+            btnValidate.textContent = 'Valider';
+            btnValidate.onclick = validateQuizAnswer;
+            container.appendChild(btnValidate);
+        }
+
+        function validateQuizAnswer() {
+            const q = quizQuestions[currentQuizQuestion];
+            let isCorrect = false;
+
+            if (q.type === 'text' || q.type === 'number') {
+                const input = document.getElementById('quizInput');
                 const value = input.value.toLowerCase().trim();
-                const points = parseInt(input.dataset.points);
-
-                if (answers.includes(value)) {
-                    score += points;
+                isCorrect = q.answers.includes(value);
+                
+                if (isCorrect) {
                     input.style.borderColor = 'green';
+                    quizScore += q.points;
                 } else {
                     input.style.borderColor = 'red';
                 }
-            });
+            } else if (q.type === 'checkbox') {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                const selectedAnswers = Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
 
-            // Question checkbox
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            const q5Answers = JSON.parse(document.getElementById('q5').dataset.answers);
-            const q5Points = parseInt(document.getElementById('q5').dataset.points);
-            const selectedAnswers = Array.from(checkboxes)
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
-
-            if (selectedAnswers.length === q5Answers.length &&
-                selectedAnswers.every(a => q5Answers.includes(a))) {
-                score += q5Points;
+                isCorrect = selectedAnswers.length === q.answers.length &&
+                    selectedAnswers.every(a => q.answers.includes(a));
+                
+                if (isCorrect) {
+                    quizScore += q.points;
+                }
             }
 
-            document.getElementById('scoreDisplay').textContent = `Score: ${score}/${maxScore}`;
-            document.getElementById('quizContainer').style.display = 'none';
-            document.getElementById('quizResult').style.display = 'block';
+            // Passer à la question suivante après un court délai
+            setTimeout(() => {
+                currentQuizQuestion++;
+                showQuizQuestion();
+            }, isCorrect ? 800 : 1500);
+        }
+
+        function showQuizResult() {
+            const container = document.getElementById('quizContainer');
+            const maxScore = 11;
+            
+            container.innerHTML = `
+                <div class="score-display">Score: ${quizScore}/${maxScore}</div>
+                <button class="btn-yes" onclick="nextScreen(11)">Suivant</button>
+            `;
         }
 
         // Écran 11
