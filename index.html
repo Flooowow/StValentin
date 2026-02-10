@@ -71,7 +71,6 @@
         .btn-no {
             background: #CD6889;
             color: white;
-            position: absolute;
         }
 
         .btn-container {
@@ -478,6 +477,11 @@
             
             // Si la souris est à moins de 150px du bouton, il fuit
             if (distance < 150) {
+                // Passer en position absolute
+                if (btnNo.style.position !== 'absolute') {
+                    btnNo.style.position = 'absolute';
+                }
+                
                 const container = document.querySelector('#screen1 .btn-container');
                 const containerRect = container.getBoundingClientRect();
                 
@@ -510,6 +514,11 @@
 
         // Navigation entre écrans
         function nextScreen(screenNum) {
+            // Nettoyer l'écran précédent
+            if (memoryInterval) {
+                clearInterval(memoryInterval);
+            }
+            
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen' + screenNum).classList.add('active');
 
@@ -518,6 +527,10 @@
                 screen1Active = false;
             } else {
                 screen1Active = true;
+                // Réinitialiser le bouton NON
+                btnNo.style.position = 'relative';
+                btnNo.style.left = '0';
+                btnNo.style.top = '0';
             }
 
             // Initialisation spécifique à certains écrans
@@ -634,7 +647,9 @@
             // Timer (visuel uniquement, pas de game over)
             memoryTimer = 60;
             document.getElementById('timer').textContent = '01:00';
-            clearInterval(memoryInterval);
+            if (memoryInterval) {
+                clearInterval(memoryInterval);
+            }
             memoryInterval = setInterval(() => {
                 memoryTimer--;
                 const mins = Math.floor(memoryTimer / 60);
@@ -644,13 +659,14 @@
 
                 if (memoryTimer <= 0) {
                     clearInterval(memoryInterval);
+                    memoryInterval = null;
                     // Le timer s'arrête à 00:00 mais le jeu continue
                 }
             }, 1000);
         }
 
         function flipCard(card) {
-            if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
+            if (!card || card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
                 return;
             }
 
@@ -659,12 +675,22 @@
             flippedCards.push(card);
 
             if (flippedCards.length === 2) {
-                setTimeout(checkMatch, 500);
+                setTimeout(checkMatch, 800);
             }
         }
 
         function checkMatch() {
+            if (flippedCards.length !== 2) {
+                flippedCards = [];
+                return;
+            }
+            
             const [card1, card2] = flippedCards;
+            
+            if (!card1 || !card2) {
+                flippedCards = [];
+                return;
+            }
 
             if (card1.dataset.emoji === card2.dataset.emoji) {
                 card1.classList.add('matched');
@@ -672,7 +698,10 @@
                 matchedPairs++;
 
                 if (matchedPairs === 8) {
-                    clearInterval(memoryInterval);
+                    if (memoryInterval) {
+                        clearInterval(memoryInterval);
+                        memoryInterval = null;
+                    }
                     setTimeout(() => {
                         document.getElementById('memoryGrid').style.display = 'none';
                         document.getElementById('timer').style.display = 'none';
