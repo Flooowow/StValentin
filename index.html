@@ -86,15 +86,15 @@
         /* Écran 3 - Grille de boutons */
         .button-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(10, 1fr);
             gap: 10px;
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .button-grid button {
-            padding: 15px;
-            font-size: 1.2em;
+            padding: 10px;
+            font-size: 1em;
             margin: 0;
         }
 
@@ -462,17 +462,63 @@
 
         // Écran 1 - Bouton NON qui fuit
         const btnNo = document.getElementById('btnNo');
-        btnNo.addEventListener('mouseenter', () => {
-            const x = Math.random() * (window.innerWidth - 200);
-            const y = Math.random() * (window.innerHeight - 100);
-            btnNo.style.left = x + 'px';
-            btnNo.style.top = y + 'px';
+        let screen1Active = true;
+        
+        function moveNoButton(mouseX, mouseY) {
+            if (!screen1Active) return;
+            
+            const btnRect = btnNo.getBoundingClientRect();
+            const btnCenterX = btnRect.left + btnRect.width / 2;
+            const btnCenterY = btnRect.top + btnRect.height / 2;
+            
+            const distance = Math.sqrt(
+                Math.pow(mouseX - btnCenterX, 2) + 
+                Math.pow(mouseY - btnCenterY, 2)
+            );
+            
+            // Si la souris est à moins de 150px du bouton, il fuit
+            if (distance < 150) {
+                const container = document.querySelector('#screen1 .btn-container');
+                const containerRect = container.getBoundingClientRect();
+                
+                // Calculer une position opposée à la souris
+                let newX = btnCenterX - containerRect.left;
+                let newY = btnCenterY - containerRect.top;
+                
+                if (mouseX < btnCenterX) {
+                    newX = Math.min(containerRect.width - 100, newX + 200);
+                } else {
+                    newX = Math.max(0, newX - 200);
+                }
+                
+                if (mouseY < btnCenterY) {
+                    newY = Math.min(containerRect.height - 50, newY + 100);
+                } else {
+                    newY = Math.max(0, newY - 100);
+                }
+                
+                btnNo.style.left = newX + 'px';
+                btnNo.style.top = newY + 'px';
+            }
+        }
+        
+        document.addEventListener('mousemove', (e) => {
+            if (screen1Active) {
+                moveNoButton(e.clientX, e.clientY);
+            }
         });
 
         // Navigation entre écrans
         function nextScreen(screenNum) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen' + screenNum).classList.add('active');
+
+            // Désactiver le tracking du bouton NON si on quitte l'écran 1
+            if (screenNum !== 1) {
+                screen1Active = false;
+            } else {
+                screen1Active = true;
+            }
 
             // Initialisation spécifique à certains écrans
             if (screenNum === 3) initScreen3();
@@ -500,7 +546,7 @@
             grid.innerHTML = '';
             clickedButtons3 = 0;
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 70; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'btn-yes';
                 btn.textContent = 'OUI';
@@ -510,7 +556,7 @@
                         this.style.opacity = '0.5';
                         clickedButtons3++;
 
-                        if (clickedButtons3 === 20) {
+                        if (clickedButtons3 === 70) {
                             setTimeout(() => {
                                 launchConfetti();
                                 showYes();
@@ -565,9 +611,14 @@
 
             const grid = document.getElementById('memoryGrid');
             grid.innerHTML = '';
+            grid.style.display = 'grid';
             memoryCards = [];
             flippedCards = [];
             matchedPairs = 0;
+            
+            document.getElementById('memoryResult').style.display = 'none';
+            document.getElementById('bahNon').style.display = 'none';
+            document.getElementById('timer').style.display = 'block';
 
             cards.forEach((emoji, index) => {
                 const card = document.createElement('div');
@@ -580,7 +631,7 @@
                 memoryCards.push(card);
             });
 
-            // Timer
+            // Timer (visuel uniquement, pas de game over)
             memoryTimer = 60;
             document.getElementById('timer').textContent = '01:00';
             clearInterval(memoryInterval);
@@ -593,8 +644,7 @@
 
                 if (memoryTimer <= 0) {
                     clearInterval(memoryInterval);
-                    alert('Temps écoulé ! 😢');
-                    nextScreen(1);
+                    // Le timer s'arrête à 00:00 mais le jeu continue
                 }
             }, 1000);
         }
@@ -623,10 +673,12 @@
 
                 if (matchedPairs === 8) {
                     clearInterval(memoryInterval);
-                    document.getElementById('memoryGrid').style.display = 'none';
-                    document.getElementById('timer').style.display = 'none';
-                    document.getElementById('memoryResult').style.display = 'block';
-                    launchConfetti();
+                    setTimeout(() => {
+                        document.getElementById('memoryGrid').style.display = 'none';
+                        document.getElementById('timer').style.display = 'none';
+                        document.getElementById('memoryResult').style.display = 'block';
+                        launchConfetti();
+                    }, 500);
                 }
             } else {
                 card1.classList.remove('flipped');
@@ -646,15 +698,15 @@
         // Écran 8 - Phrases
         function initPhrases() {
             const phrases = [
-                { text: "# est # n°1 dans mon #", answers: ["Câline", "la", "coeur"] },
-                { text: "Je # pour ne pas donner d'# à ce mauvais #", answers: ["t'ignore", "attention", "comportement"] },
-                { text: "Dit tu veux pas faire des # avec moi ?", answers: ["perles"] },
-                { text: "Je #", answers: ["t'aime"] },
-                { text: "Tu peux y aller plus # tu sais", answers: ["fort"] },
-                { text: "Tu veux un # ?", answers: ["café"] },
-                { text: "Merci pour le #", answers: ["repas"] },
-                { text: "Oh regarde comme elle est # !", answers: ["chou"] },
-                { text: "Je ne # plus # je #", answers: ["sais", "comment", "m'appel"] }
+                { text: "# est # n°1 dans mon #", answers: [["câline"], ["la"], ["coeur", "cœur"]] },
+                { text: "Je # pour ne pas donner d'# à ce mauvais #", answers: [["t'ignore"], ["attention"], ["comportement"]] },
+                { text: "Dit tu veux pas faire des # avec moi ?", answers: [["perles"]] },
+                { text: "Je #", answers: [["t'aime"]] },
+                { text: "Tu peux y aller plus # tu sais", answers: [["fort"]] },
+                { text: "Tu veux un # ?", answers: [["café"]] },
+                { text: "Merci pour le #", answers: [["repas"]] },
+                { text: "Oh regarde comme elle est # !", answers: [["chou"]] },
+                { text: "Attend! Attend! Attend je ne # plus # je #", answers: [["sais"], ["comment"], ["m'appel", "m'appelle"]] }
             ];
 
             const container = document.getElementById('phrasesContainer');
@@ -671,7 +723,7 @@
 
                 html += '<span class="phrase-emoji">✅</span>';
                 div.innerHTML = html;
-                div.dataset.answers = JSON.stringify(phrase.answers.map(a => a.toLowerCase()));
+                div.dataset.answers = JSON.stringify(phrase.answers);
                 container.appendChild(div);
 
                 const inputs = div.querySelectorAll('input');
@@ -682,10 +734,16 @@
         }
 
         function checkPhrase(div, inputs) {
-            const answers = JSON.parse(div.dataset.answers);
+            const answersArray = JSON.parse(div.dataset.answers);
             const values = Array.from(inputs).map(inp => inp.value.toLowerCase().trim());
 
-            if (values.length === answers.length && values.every((v, i) => v === answers[i])) {
+            // Vérifier si chaque valeur correspond à au moins une réponse valide
+            const allCorrect = values.every((value, index) => {
+                const validAnswers = answersArray[index];
+                return validAnswers.some(answer => answer.toLowerCase() === value);
+            });
+
+            if (allCorrect && values.every(v => v !== '')) {
                 div.querySelector('.phrase-emoji').classList.add('show');
 
                 // Vérifier si toutes les phrases sont complètes
