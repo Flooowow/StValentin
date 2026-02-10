@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #5B374D, #96527A, #CD6889);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        }
+
+        button {
+            font-size: 1.5em;
+            padding: 20px 40px;
+            margin: 15px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn-yes {
+            background: #F99F72;
+            color: #5B374D;
+        }
+
+        .btn-no {
+            background: #CD6889;
+            color: white;
+            position: absolute;
+        }
+
+        .btn-container {
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Écran 3 - Grille de boutons */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .button-grid button {
+            padding: 15px;
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #F99F72;
+            position: absolute;
+            animation: confetti-fall 3s linear;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Memory Game */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            gap: 15px;
+            justify-content: center;
+            margin: 30px auto;
+        }
+
+        .memory-card {
+            width: 100px;
+            height: 100px;
+            background: #FE895E;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .memory-card:hover {
+            transform: scale(1.05);
+        }
+
+        .memory-card.flipped {
+            background: #F99F72;
+        }
+
+        .memory-card.matched {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .timer {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #FE895E;
+            font-weight: bold;
+        }
+
+        /* Quiz */
+        .quiz-question {
+            margin: 30px 0;
+            text-align: left;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .quiz-question h3 {
+            margin-bottom: 15px;
+            color: #F99F72;
+        }
+
+        .quiz-question input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            border: 2px solid #FE895E;
+            margin: 10px 0;
+        }
+
+        .quiz-question label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+
+        .quiz-question input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .correct {
+            color: #90EE90;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: #FF6B6B;
+            font-weight: bold;
+        }
+
+        /* Phrase completion */
+        .phrase-container {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .phrase {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 1.2em;
+            position: relative;
+        }
+
+        .phrase input {
+            background: #FE895E;
+            border: none;
+            border-bottom: 2px solid white;
+            color: white;
+            font-size: 1em;
+            padding: 5px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .phrase-emoji {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .phrase-emoji.show {
+            opacity: 1;
+            animation: pop 0.5s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: translateY(-50%) scale(0); }
+            50% { transform: translateY(-50%) scale(1.2); }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+
+        /* Message d'erreur */
+        .error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: red;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .error-overlay.show {
+            display: flex;
+            animation: shake 0.5s;
+        }
+
+        .error-overlay h1 {
+            font-size: 5em;
+            color: white;
+            text-shadow: 3px 3px 10px black;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-20px); }
+            75% { transform: translateX(20px); }
+        }
+
+        /* Texte multicolore */
+        .rainbow-text {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 30px 0;
+        }
+
+        .rainbow-text span {
+            display: inline-block;
+            animation: rainbow 3s infinite;
+        }
+
+        .rainbow-text span:nth-child(1) { animation-delay: 0s; }
+        .rainbow-text span:nth-child(2) { animation-delay: 0.1s; }
+        .rainbow-text span:nth-child(3) { animation-delay: 0.2s; }
+        .rainbow-text span:nth-child(4) { animation-delay: 0.3s; }
+        .rainbow-text span:nth-child(5) { animation-delay: 0.4s; }
+        .rainbow-text span:nth-child(6) { animation-delay: 0.5s; }
+        .rainbow-text span:nth-child(7) { animation-delay: 0.6s; }
+        .rainbow-text span:nth-child(8) { animation-delay: 0.7s; }
+
+        @keyframes rainbow {
+            0%, 100% { color: #F99F72; }
+            25% { color: #FE895E; }
+            50% { color: #CD6889; }
+            75% { color: #96527A; }
+        }
+
+        /* Canvas pour les cœurs */
+        #heartsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .tant-pis {
+            font-size: 2em;
+            color: #FE895E;
+            margin: 20px 0;
+        }
+
+        .score-display {
+            font-size: 2em;
+            margin: 30px 0;
+            color: #F99F72;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartsCanvas"></canvas>
+
+    <!-- Écran 1 -->
+    <div class="screen active" id="screen1">
+        <h1>Est-ce que tu m'aimes ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" onclick="nextScreen(2)">OUI</button>
+            <button class="btn-no" id="btnNo">NON</button>
+        </div>
+    </div>
+
+    <!-- Écran 2 -->
+    <div class="screen" id="screen2">
+        <h1>Tu es sûre ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" id="btn2a" onclick="growOpposite('btn2b')">OUI</button>
+            <button class="btn-yes" id="btn2b" onclick="growOpposite('btn2a')">OUI</button>
+        </div>
+    </div>
+
+    <!-- Écran 3 -->
+    <div class="screen" id="screen3">
+        <h1>Vraiment sûre ?</h1>
+        <div class="button-grid" id="buttonGrid"></div>
+    </div>
+
+    <!-- Écran 4 -->
+    <div class="screen" id="screen4">
+        <h1>Un jeu ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" onclick="nextScreen(5)">OUI</button>
+            <button class="btn-yes" onclick="showTantPis()">NON</button>
+        </div>
+        <div class="tant-pis" id="tantPis" style="display: none;">Tant pis...</div>
+    </div>
+
+    <!-- Écran 5 - Memory -->
+    <div class="screen" id="screen5">
+        <h1>Memory Game</h1>
+        <div class="timer" id="timer">01:00</div>
+        <div class="memory-grid" id="memoryGrid"></div>
+        <div id="memoryResult" style="display: none;">
+            <h2>BRAVO! 🎉</h2>
+            <button class="btn-yes" onclick="showBahNon()">Suivant</button>
+            <div id="bahNon" style="display: none; font-size: 2em; margin-top: 20px; color: #FE895E;">Bah non 😏</div>
+        </div>
+    </div>
+
+    <!-- Écran 6 -->
+    <div class="screen" id="screen6">
+        <h1>Encore ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" onclick="nextScreen(7)">OUI!</button>
+            <button class="btn-yes" onclick="window.close()">NON TG!</button>
+        </div>
+    </div>
+
+    <!-- Écran 7 -->
+    <div class="screen" id="screen7">
+        <h1>Tu penses bien nous connaître ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" onclick="nextScreen(8)">OUI!</button>
+            <button class="btn-yes" onclick="alert('Ah bon ? 🤔 Bon on va vérifier alors !'); nextScreen(8)">Non….</button>
+        </div>
+    </div>
+
+    <!-- Écran 8 - Phrases -->
+    <div class="screen" id="screen8">
+        <h1>Complète nos phrases habituelles</h1>
+        <div class="phrase-container" id="phrasesContainer"></div>
+    </div>
+
+    <!-- Écran 9 -->
+    <div class="screen" id="screen9">
+        <h1>Un dernier ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" onclick="launchConfettiThenNext()">OUIIIIIIIIII!</button>
+            <button class="btn-yes" onclick="showError()">Non mais va te faire sérieux</button>
+        </div>
+    </div>
+
+    <!-- Overlay d'erreur -->
+    <div class="error-overlay" id="errorOverlay">
+        <h1>ERREUR !!!</h1>
+    </div>
+
+    <!-- Écran 10 - Quiz -->
+    <div class="screen" id="screen10">
+        <h1>Voilà un petit quizz</h1>
+        <div id="quizContainer"></div>
+        <div id="quizResult" style="display: none;">
+            <div class="score-display" id="scoreDisplay"></div>
+            <button class="btn-yes" onclick="nextScreen(11)">Suivant</button>
+        </div>
+    </div>
+
+    <!-- Écran 11 -->
+    <div class="screen" id="screen11">
+        <h1>Tu veux voir un truc ?</h1>
+        <div class="btn-container">
+            <button class="btn-yes" id="btn11a" onclick="transformButton('btn11a')">oui vas-y</button>
+            <button class="btn-yes" id="btn11b" onclick="transformButton('btn11b')">non c'est bon</button>
+        </div>
+        <button class="btn-yes" id="btn11next" style="display: none;" onclick="nextScreen(12)">Suivant</button>
+    </div>
+
+    <!-- Écran Final -->
+    <div class="screen" id="screen12">
+        <div class="rainbow-text">
+            <span>B</span><span>i</span><span>s</span><span>o</span><span>u</span><span>s</span>
+            <span>j</span><span>e</span> <span>t</span><span>'</span><span>a</span><span>i</span><span>m</span><span>e</span>
+            <span>m</span><span>o</span><span>n</span> <span>c</span><span>h</span><span>a</span><span>t</span> <span>!</span>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let clickCount2 = 0;
+        let clickedButtons3 = 0;
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let memoryTimer = 60;
+        let memoryInterval;
+        let btn11Clicked = 0;
+
+        // Écran 1 - Bouton NON qui fuit
+        const btnNo = document.getElementById('btnNo');
+        btnNo.addEventListener('mouseenter', () => {
+            const x = Math.random() * (window.innerWidth - 200);
+            const y = Math.random() * (window.innerHeight - 100);
+            btnNo.style.left = x + 'px';
+            btnNo.style.top = y + 'px';
+        });
+
+        // Navigation entre écrans
+        function nextScreen(screenNum) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen' + screenNum).classList.add('active');
+
+            // Initialisation spécifique à certains écrans
+            if (screenNum === 3) initScreen3();
+            if (screenNum === 5) initMemory();
+            if (screenNum === 8) initPhrases();
+            if (screenNum === 10) initQuiz();
+            if (screenNum === 12) startHeartsCascade();
+        }
+
+        // Écran 2 - Boutons qui grossissent
+        function growOpposite(btnId) {
+            clickCount2++;
+            const btn = document.getElementById(btnId);
+            const currentSize = parseFloat(btn.style.fontSize) || 1.5;
+            btn.style.fontSize = (currentSize + 0.3) + 'em';
+
+            if (clickCount2 >= 5) {
+                setTimeout(() => nextScreen(3), 500);
+            }
+        }
+
+        // Écran 3 - Grille de boutons
+        function initScreen3() {
+            const grid = document.getElementById('buttonGrid');
+            grid.innerHTML = '';
+            clickedButtons3 = 0;
+
+            for (let i = 0; i < 20; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-yes';
+                btn.textContent = 'OUI';
+                btn.onclick = function() {
+                    if (!this.disabled) {
+                        this.disabled = true;
+                        this.style.opacity = '0.5';
+                        clickedButtons3++;
+
+                        if (clickedButtons3 === 20) {
+                            setTimeout(() => {
+                                launchConfetti();
+                                showYes();
+                            }, 300);
+                        }
+                    }
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function showYes() {
+            const h1 = document.querySelector('#screen3 h1');
+            h1.textContent = 'YES!';
+            h1.style.fontSize = '5em';
+            setTimeout(() => nextScreen(4), 2000);
+        }
+
+        // Confetti
+        function launchConfetti() {
+            const colors = ['#F99F72', '#FE895E', '#CD6889', '#96527A'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = Math.random() * 10 + 5 + 'px';
+                    confetti.style.height = confetti.style.width;
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        // Écran 4 - Tant pis
+        function showTantPis() {
+            document.getElementById('tantPis').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('tantPis').style.display = 'none';
+                nextScreen(1);
+            }, 6000);
+        }
+
+        // Écran 5 - Memory
+        function initMemory() {
+            const emojis = ['🥰', '😻', '🖕', '😘', '🥵', '💞', '❤️‍🔥', '👉👌'];
+            const cards = [...emojis, ...emojis];
+            cards.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '';
+            memoryCards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+
+            cards.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.textContent = '?';
+                card.onclick = () => flipCard(card);
+                grid.appendChild(card);
+                memoryCards.push(card);
+            });
+
+            // Timer
+            memoryTimer = 60;
+            document.getElementById('timer').textContent = '01:00';
+            clearInterval(memoryInterval);
+            memoryInterval = setInterval(() => {
+                memoryTimer--;
+                const mins = Math.floor(memoryTimer / 60);
+                const secs = memoryTimer % 60;
+                document.getElementById('timer').textContent =
+                    mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+
+                if (memoryTimer <= 0) {
+                    clearInterval(memoryInterval);
+                    alert('Temps écoulé ! 😢');
+                    nextScreen(1);
+                }
+            }, 1000);
+        }
+
+        function flipCard(card) {
+            if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
+                return;
+            }
+
+            card.classList.add('flipped');
+            card.textContent = card.dataset.emoji;
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                setTimeout(checkMatch, 500);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+
+                if (matchedPairs === 8) {
+                    clearInterval(memoryInterval);
+                    document.getElementById('memoryGrid').style.display = 'none';
+                    document.getElementById('timer').style.display = 'none';
+                    document.getElementById('memoryResult').style.display = 'block';
+                    launchConfetti();
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '?';
+                card2.textContent = '?';
+            }
+
+            flippedCards = [];
+        }
+
+        function showBahNon() {
+            document.getElementById('bahNon').style.display = 'block';
+            setTimeout(() => nextScreen(6), 2000);
+        }
+
+        // Écran 8 - Phrases
+        function initPhrases() {
+            const phrases = [
+                { text: "# est # n°1 dans mon #", answers: ["Câline", "la", "coeur"] },
+                { text: "Je # pour ne pas donner d'# à ce mauvais #", answers: ["t'ignore", "attention", "comportement"] },
+                { text: "Dit tu veux pas faire des # avec moi ?", answers: ["perles"] },
+                { text: "Je #", answers: ["t'aime"] },
+                { text: "Tu peux y aller plus # tu sais", answers: ["fort"] },
+                { text: "Tu veux un # ?", answers: ["café"] },
+                { text: "Merci pour le #", answers: ["repas"] },
+                { text: "Oh regarde comme elle est # !", answers: ["chou"] },
+                { text: "Je ne # plus # je #", answers: ["sais", "comment", "m'appel"] }
+            ];
+
+            const container = document.getElementById('phrasesContainer');
+            container.innerHTML = '';
+
+            phrases.forEach((phrase, idx) => {
+                const div = document.createElement('div');
+                div.className = 'phrase';
+
+                let html = phrase.text;
+                phrase.answers.forEach(() => {
+                    html = html.replace('#', '<input type="text">');
+                });
+
+                html += '<span class="phrase-emoji">✅</span>';
+                div.innerHTML = html;
+                div.dataset.answers = JSON.stringify(phrase.answers.map(a => a.toLowerCase()));
+                container.appendChild(div);
+
+                const inputs = div.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', () => checkPhrase(div, inputs));
+                });
+            });
+        }
+
+        function checkPhrase(div, inputs) {
+            const answers = JSON.parse(div.dataset.answers);
+            const values = Array.from(inputs).map(inp => inp.value.toLowerCase().trim());
+
+            if (values.length === answers.length && values.every((v, i) => v === answers[i])) {
+                div.querySelector('.phrase-emoji').classList.add('show');
+
+                // Vérifier si toutes les phrases sont complètes
+                const allPhrases = document.querySelectorAll('.phrase');
+                const allComplete = Array.from(allPhrases).every(p =>
+                    p.querySelector('.phrase-emoji').classList.contains('show')
+                );
+
+                if (allComplete) {
+                    setTimeout(() => nextScreen(9), 1000);
+                }
+            }
+        }
+
+        // Écran 9
+        function launchConfettiThenNext() {
+            launchConfetti();
+            setTimeout(() => nextScreen(10), 2000);
+        }
+
+        function showError() {
+            const overlay = document.getElementById('errorOverlay');
+            overlay.classList.add('show');
+            setTimeout(() => {
+                overlay.classList.remove('show');
+            }, 2000);
+        }
+
+        // Écran 10 - Quiz
+        function initQuiz() {
+            const questions = [
+                {
+                    q: "Où nous sommes nous rencontré pour la première fois?",
+                    type: "text",
+                    answers: ["restaurant universitaire", "ru"],
+                    points: 1
+                },
+                {
+                    q: "Comment s'appelle notre lieu de rendez-vous en centre ville?",
+                    type: "text",
+                    answers: ["le point", "point", "au point"],
+                    points: 1
+                },
+                {
+                    q: "Quelle est la combinaison de parfum que nous préférons?",
+                    type: "text",
+                    answers: ["menthe et chocolat"],
+                    points: 1
+                },
+                {
+                    q: "Quel est le jeu auquel j'ai le plus joué ces derniers mois?",
+                    type: "text",
+                    answers: ["stardew valley"],
+                    points: 3
+                },
+                {
+                    q: "Combien mesure la bête? (nombre uniquement)",
+                    type: "number",
+                    answers: ["17"],
+                    points: 2
+                },
+                {
+                    q: "Quelles ont été nos activités les plus populaires cet été?",
+                    type: "checkbox",
+                    options: ["Natation", "Vélo", "Peindre", "Dessiner", "Manger", "Regarder des films"],
+                    answers: ["natation", "dessiner", "manger"],
+                    points: 3
+                }
+            ];
+
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+
+            questions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = 'quiz-question';
+
+                let html = `<h3>Question ${idx + 1} (${q.points} point${q.points > 1 ? 's' : ''}): ${q.q}</h3>`;
+
+                if (q.type === 'text' || q.type === 'number') {
+                    html += `<input type="${q.type}" id="q${idx}" data-answers='${JSON.stringify(q.answers)}' data-points="${q.points}">`;
+                } else if (q.type === 'checkbox') {
+                    q.options.forEach(opt => {
+                        html += `<label><input type="checkbox" value="${opt.toLowerCase()}" data-question="${idx}"> ${opt}</label>`;
+                    });
+                    html += `<div style="display:none" data-answers='${JSON.stringify(q.answers)}' data-points="${q.points}" id="q${idx}"></div>`;
+                }
+
+                div.innerHTML = html;
+                container.appendChild(div);
+            });
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'btn-yes';
+            submitBtn.textContent = 'Valider';
+            submitBtn.onclick = checkQuiz;
+            container.appendChild(submitBtn);
+        }
+
+        function checkQuiz() {
+            let score = 0;
+            let maxScore = 11;
+
+            // Questions texte et nombre
+            document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                const answers = JSON.parse(input.dataset.answers);
+                const value = input.value.toLowerCase().trim();
+                const points = parseInt(input.dataset.points);
+
+                if (answers.includes(value)) {
+                    score += points;
+                    input.style.borderColor = 'green';
+                } else {
+                    input.style.borderColor = 'red';
+                }
+            });
+
+            // Question checkbox
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const q5Answers = JSON.parse(document.getElementById('q5').dataset.answers);
+            const q5Points = parseInt(document.getElementById('q5').dataset.points);
+            const selectedAnswers = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            if (selectedAnswers.length === q5Answers.length &&
+                selectedAnswers.every(a => q5Answers.includes(a))) {
+                score += q5Points;
+            }
+
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}/${maxScore}`;
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('quizResult').style.display = 'block';
+        }
+
+        // Écran 11
+        function transformButton(btnId) {
+            document.getElementById(btnId).textContent = '🖕';
+            btn11Clicked++;
+
+            if (btn11Clicked === 2) {
+                document.getElementById('btn11next').style.display = 'inline-block';
+            }
+        }
+
+        // Écran Final - Cascade de cœurs
+        function startHeartsCascade() {
+            const canvas = document.getElementById('heartsCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const hearts = [];
+
+            for (let i = 0; i < 100; i++) {
+                hearts.push({
+                    x: Math.random() * canvas.width,
+                    y: -20 - Math.random() * 500,
+                    speed: 2 + Math.random() * 3,
+                    size: 20 + Math.random() * 20
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                hearts.forEach(heart => {
+                    ctx.font = heart.size + 'px Arial';
+                    ctx.fillText('💖', heart.x, heart.y);
+
+                    heart.y += heart.speed;
+
+                    if (heart.y > canvas.height) {
+                        heart.y = -20;
+                        heart.x = Math.random() * canvas.width;
+                    }
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>
