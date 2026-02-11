@@ -71,6 +71,7 @@
         .btn-no {
             background: #CD6889;
             color: white;
+            transition: transform 0.1s ease;
         }
 
         .btn-container {
@@ -300,6 +301,23 @@
         .rainbow-text span:nth-child(6) { animation-delay: 0.5s; }
         .rainbow-text span:nth-child(7) { animation-delay: 0.6s; }
         .rainbow-text span:nth-child(8) { animation-delay: 0.7s; }
+        .rainbow-text span:nth-child(9) { animation-delay: 0.8s; }
+        .rainbow-text span:nth-child(10) { animation-delay: 0.9s; }
+        .rainbow-text span:nth-child(11) { animation-delay: 1s; }
+        .rainbow-text span:nth-child(12) { animation-delay: 1.1s; }
+        .rainbow-text span:nth-child(13) { animation-delay: 1.2s; }
+        .rainbow-text span:nth-child(14) { animation-delay: 1.3s; }
+        .rainbow-text span:nth-child(15) { animation-delay: 1.4s; }
+        .rainbow-text span:nth-child(16) { animation-delay: 1.5s; }
+        .rainbow-text span:nth-child(17) { animation-delay: 1.6s; }
+        .rainbow-text span:nth-child(18) { animation-delay: 1.7s; }
+        .rainbow-text span:nth-child(19) { animation-delay: 1.8s; }
+        .rainbow-text span:nth-child(20) { animation-delay: 1.9s; }
+        .rainbow-text span:nth-child(21) { animation-delay: 2s; }
+        .rainbow-text span:nth-child(22) { animation-delay: 2.1s; }
+        .rainbow-text span:nth-child(23) { animation-delay: 2.2s; }
+        .rainbow-text span:nth-child(24) { animation-delay: 2.3s; }
+        .rainbow-text span:nth-child(25) { animation-delay: 2.4s; }
 
         @keyframes rainbow {
             0%, 100% { color: #F99F72; }
@@ -458,10 +476,44 @@
         let quizScore = 0;
         let quizQuestions = [];
 
-        // Écran 1 - Bouton NON qui fuit
+        // Écran 1 - Bouton NON qui se téléporte
         const btnNo = document.getElementById('btnNo');
         let screen1Active = true;
+        let lastTeleport = 0;
         
+        btnNo.addEventListener('mouseenter', teleportNoButton);
+        
+        function teleportNoButton() {
+            if (!screen1Active) return;
+            
+            const now = Date.now();
+            // Éviter les téléportations trop fréquentes
+            if (now - lastTeleport < 200) return;
+            lastTeleport = now;
+            
+            // Passer en position absolute
+            if (btnNo.style.position !== 'absolute') {
+                btnNo.style.position = 'absolute';
+            }
+            
+            const container = document.querySelector('#screen1 .btn-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            // Téléportation aléatoire
+            const newX = Math.random() * (containerRect.width - 150);
+            const newY = Math.random() * (containerRect.height - 80);
+            
+            btnNo.style.left = newX + 'px';
+            btnNo.style.top = newY + 'px';
+            
+            // Effet visuel de téléportation
+            btnNo.style.transform = 'scale(0)';
+            setTimeout(() => {
+                btnNo.style.transform = 'scale(1)';
+            }, 50);
+        }
+        
+        // Garder aussi le tracking souris pour une sécurité supplémentaire
         function moveNoButton(mouseX, mouseY) {
             if (!screen1Active) return;
             
@@ -474,34 +526,9 @@
                 Math.pow(mouseY - btnCenterY, 2)
             );
             
-            // Si la souris est à moins de 150px du bouton, il fuit
-            if (distance < 150) {
-                // Passer en position absolute
-                if (btnNo.style.position !== 'absolute') {
-                    btnNo.style.position = 'absolute';
-                }
-                
-                const container = document.querySelector('#screen1 .btn-container');
-                const containerRect = container.getBoundingClientRect();
-                
-                // Calculer une position opposée à la souris
-                let newX = btnCenterX - containerRect.left;
-                let newY = btnCenterY - containerRect.top;
-                
-                if (mouseX < btnCenterX) {
-                    newX = Math.min(containerRect.width - 100, newX + 200);
-                } else {
-                    newX = Math.max(0, newX - 200);
-                }
-                
-                if (mouseY < btnCenterY) {
-                    newY = Math.min(containerRect.height - 50, newY + 100);
-                } else {
-                    newY = Math.max(0, newY - 100);
-                }
-                
-                btnNo.style.left = newX + 'px';
-                btnNo.style.top = newY + 'px';
+            // Si la souris est à moins de 80px du bouton, il se téléporte
+            if (distance < 80) {
+                teleportNoButton();
             }
         }
         
@@ -530,6 +557,7 @@
                 btnNo.style.position = 'relative';
                 btnNo.style.left = '0';
                 btnNo.style.top = '0';
+                btnNo.style.transform = 'scale(1)';
             }
 
             // Initialisation spécifique à certains écrans
@@ -818,7 +846,7 @@
                 {
                     q: "Quelle est la combinaison de parfum que nous préférons?",
                     type: "text",
-                    answers: ["menthe et chocolat"],
+                    answers: ["menthe et chocolat", "menthe chocolat", "chocolat et menthe", "chocolat menthe"],
                     points: 1
                 },
                 {
@@ -930,6 +958,7 @@
             container.innerHTML = `
                 <div class="score-display">Score: ${quizScore}/${maxScore}</div>
                 <button class="btn-yes" onclick="nextScreen(11)">Suivant</button>
+                <p style="font-size: 0.8em; color: rgba(255,255,255,0.5); margin-top: 20px;">Juste pour toi ❤️</p>
             `;
         }
 
